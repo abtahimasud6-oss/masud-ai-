@@ -8,7 +8,25 @@ app = Flask(__name__)
 api_key = os.environ.get("GEMINI_API_KEY")
 
 try:
-        # gemini-2.5-flash মডেলের জন্য সঠিক কন্টেন্ট জেনারেশন লজিক
+    client = genai.Client(api_key=api_key)
+except Exception as e:
+    client = None
+
+@app.route("/")
+def home():
+    return render_template("index.html")
+
+@app.route("/chat", methods=["POST"])
+def chat():
+    if not client:
+        return jsonify({"error": "API Key configuration missing অথবা ভুল।"}), 500
+        
+    user_message = request.json.get("message")
+    if not user_message:
+        return jsonify({"error": "Empty message"}), 400
+
+    try:
+        # gemini-2.5-flash মডেলের জন্য কন্টেন্ট জেনারেশন লজিক
         response = client.models.generate_content(
             model='gemini-2.5-flash',
             contents=user_message,
@@ -21,23 +39,6 @@ try:
             bot_reply = "দুঃখিত, আমি কোনো উত্তর তৈরি করতে পারিনি। দয়া করে আবার চেষ্টা করুন।"
             
         return jsonify({"response": bot_reply})
-
-@app.route("/chat", methods=["POST"])
-def chat():
-    if not client:
-        return jsonify({"error": "API Key configuration missing অথবা ভুল।"}), 500
-        
-    user_message = request.json.get("message")
-    if not user_message:
-        return jsonify({"error": "Empty message"}), 400
-
-    try:
-        # সরাসরি এবং ফাস্ট রেসপন্সের জন্য gemini-2.5-flash মডেল ব্যবহার
-        response = client.models.generate_content(
-            model='gemini-2.5-flash',
-            contents=user_message,
-        )
-        return jsonify({"response": response.text})
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 

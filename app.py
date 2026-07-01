@@ -1,14 +1,14 @@
 import os
 from flask import Flask, render_template, request, jsonify
-from google import genai
+from groq import Groq
 
 app = Flask(__name__)
 
-# Render-এর Environment Variable থেকে API Key নিবে
-api_key = os.environ.get("GEMINI_API_KEY")
+# Render-এর Environment Variable থেকে Groq API Key নিবে
+api_key = os.environ.get("GROQ_API_KEY")
 
 try:
-    client = genai.Client(api_key=api_key)
+    client = Groq(api_key=api_key)
 except Exception as e:
     client = None
 
@@ -18,26 +18,23 @@ def home():
 
 @app.route("/chat", methods=["POST"])
 def chat():
-    if not client:
-        return jsonify({"error": "API Key configuration missing অথবা ভুল।"}), 500
+    if not client or not api_key:
+        return jsonify({"error": "Groq API Key configuration missing অথবা ভুল।"}), 500
         
     user_message = request.json.get("message")
     if not user_message:
         return jsonify({"error": "Empty message"}), 400
 
     try:
-        # gemini-2.5-flash মডেলের জন্য কন্টেন্ট জেনারেশন লজিক
-        response = client.models.generate_content(
-            model='gemini-2.5-flash',
-            contents=user_message,
+        # Groq-এর সবচেয়ে ফাস্ট এবং ফ্রি মডেল llama-3.3-70b-versatile ব্যবহার করা হয়েছে
+        completion = client.chat.completions.create(
+            model="llama-3.3-70b-versatile",
+            messages=[
+                {"role": "user", "content": user_message}
+            ]
         )
         
-        # রেসপন্স টেক্সট চেক করা
-        if response and response.text:
-            bot_reply = response.text
-        else:
-            bot_reply = "দুঃখিত, আমি কোনো উত্তর তৈরি করতে পারিনি। দয়া করে আবার চেষ্টা করুন।"
-            
+        bot_reply = completion.choices[0].message.content
         return jsonify({"response": bot_reply})
     except Exception as e:
         return jsonify({"error": str(e)}), 500

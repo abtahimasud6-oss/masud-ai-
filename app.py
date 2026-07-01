@@ -1,3 +1,4 @@
+import os
 from flask import Flask, render_template, request, jsonify
 from google import genai
 from google.genai import types
@@ -5,10 +6,10 @@ from google.genai import types
 app = Flask(__name__)
 
 # তোমার আসল API Key এখানে বসাবে
-API_KEY = "YOUR_GEMINI_API_KEY"
+api_key = os.environ.get("GEMINI_API_KEY")
 
 try:
-    client = genai.Client(api_key=API_KEY)
+    client = genai.Client(api_key=api_key)
 except Exception as e:
     print(f"Client Initialization Error: {e}")
 

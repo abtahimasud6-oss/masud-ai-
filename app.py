@@ -8,13 +8,19 @@ app = Flask(__name__)
 api_key = os.environ.get("GEMINI_API_KEY")
 
 try:
-    client = genai.Client(api_key=api_key)
-except Exception as e:
-    client = None
-
-@app.route("/")
-def home():
-    return render_template("index.html")
+        # gemini-2.5-flash মডেলের জন্য সঠিক কন্টেন্ট জেনারেশন লজিক
+        response = client.models.generate_content(
+            model='gemini-2.5-flash',
+            contents=user_message,
+        )
+        
+        # রেসপন্স টেক্সট চেক করা
+        if response and response.text:
+            bot_reply = response.text
+        else:
+            bot_reply = "দুঃখিত, আমি কোনো উত্তর তৈরি করতে পারিনি। দয়া করে আবার চেষ্টা করুন।"
+            
+        return jsonify({"response": bot_reply})
 
 @app.route("/chat", methods=["POST"])
 def chat():

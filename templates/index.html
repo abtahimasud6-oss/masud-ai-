@@ -116,18 +116,12 @@
     40% { opacity: 1; }
   }
 
-  /* 💎 মডার্ন ইনপুট এরিয়া ও বাটন ডিজাইন 💎 */
-  #input-container-wrapper {
-    background: linear-gradient(180deg, rgba(15,15,17,0) 0%, #0f0f11 30%);
-    padding: 10px 20px 30px;
-    width: 100%;
-  }
+  /* 💎 ফিক্সড মডার্ন ইনপুট এরিয়া 💎 */
   #input-area {
     display: flex;
     max-width: 850px;
-    width: 100%;
-    margin: 0 auto;
-    gap: 0;
+    width: calc(100% - 40px);
+    margin: 10px auto 30px auto;
     background: rgba(26, 26, 29, 0.65);
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
@@ -161,6 +155,7 @@
     justify-content: center;
     transition: all 0.2s ease;
     box-shadow: 0 4px 10px rgba(79, 70, 229, 0.3);
+    flex-shrink: 0;
   }
   #send-btn:hover { 
     transform: scale(1.05);
@@ -182,11 +177,9 @@
     Masud AI
   </div>
   <div id="chat-box"></div>
-  <div id="input-container-wrapper">
-    <div id="input-area">
-      <input type="text" id="user-input" placeholder="মেসেজ লিখো...">
-      <button id="send-btn" title="পাঠাও">🛩️</button>
-    </div>
+  <div id="input-area">
+    <input type="text" id="user-input" placeholder="মেসেজ লিখো...">
+    <button id="send-btn" title="পাঠাও">🛩️</button>
   </div>
 </div>
 
@@ -241,20 +234,29 @@ async function sendMessage() {
   userInput.value = "";
   showTyping();
 
-  const response = await fetch("/chat", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ message: message })
-  });
+  try {
+    const response = await fetch("/chat", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ message: message })
+    });
 
-  const data = await response.json();
-  removeTyping();
-  addMessage(data.reply, "bot");
+    const data = await response.json();
+    removeTyping();
+    addMessage(data.reply, "bot");
+  } catch (error) {
+    console.error("Error:", error);
+    removeTyping();
+    addMessage("দুঃখিত, সার্ভারের সাথে যোগাযোগ করা যাচ্ছে না। দয়া করে আবার চেষ্টা করো।", "bot");
+  }
 }
 
 sendBtn.addEventListener("click", sendMessage);
 userInput.addEventListener("keypress", function(e) {
-  if (e.key === "Enter") sendMessage();
+  if (e.key === "Enter") {
+    e.preventDefault();
+    sendMessage();
+  }
 });
 </script>
 

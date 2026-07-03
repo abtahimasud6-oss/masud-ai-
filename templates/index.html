@@ -243,7 +243,11 @@ async function sendMessage() {
 
     const data = await response.json();
     removeTyping();
-    addMessage(data.reply, "bot");
+    
+    // 💡 স্মার্ট ডাটা ডিটেকশন ট্রিক
+    const botReply = data.reply || data.response || data.text || data.message || JSON.stringify(data);
+    addMessage(botReply, "bot");
+    
   } catch (error) {
     console.error("Error:", error);
     removeTyping();

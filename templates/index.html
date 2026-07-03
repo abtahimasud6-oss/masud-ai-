@@ -244,7 +244,7 @@ async function sendMessage() {
     const data = await response.json();
     removeTyping();
     
-    // 💡 স্মার্ট ডাটা ডিটেকশন ট্রিক
+    // স্মার্ট ডাটা ডিটেকশন ট্রিক
     const botReply = data.reply || data.response || data.text || data.message || JSON.stringify(data);
     addMessage(botReply, "bot");
     
@@ -261,6 +261,11 @@ userInput.addEventListener("keypress", function(e) {
     e.preventDefault();
     sendMessage();
   }
+});
+
+// পেজ লোড হলেই স্বাগতম বার্তা দেখানোর ফাংশন
+window.addEventListener("DOMContentLoaded", () => {
+  addMessage("Hello! আমি মাসুদ এআই (Masud AI)। আমাকে তৈরি করেছে আবতাহী মাসুদ ইয়াফি (Abtahi Masud YAFI)। আপনাকে স্বাগতম! কিভাবে সাহায্য করতে পারি?", "bot");
 });
 </script>
 
